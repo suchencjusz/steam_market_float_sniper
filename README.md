@@ -8,8 +8,6 @@ Find float, seed value in the steam market - inspired by [CSGO-Market-Float-Find
 
 The main purpose of the program is to collect data from the steam market and serialize it to simple .csv file
 
--
-
 ## To do:
 
  - [x] Gather data from steam

@@ -52,8 +52,6 @@ class MarketMachine():
     def JavaScriptLink(assetid, listingid):
         return f"javascript:BuyMarketListing('listing', '{listingid}', 730, '2', '{assetid}')"
 
-    # steam://rungame/730/76561202255233023/+csgo_econ_action_preview%20M%listingid%A%assetid%D2639221594850548100
-
     items = []
 
     def appendRequest(listing_id, asset_id, item_price, inspect_link):
