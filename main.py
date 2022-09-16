@@ -1,4 +1,6 @@
-
+import argparse
+from ast import arg
+import time
 import os
 from types import NoneType
 import ujson
@@ -6,6 +8,7 @@ import time
 import requests
 import requests_cache
 import static
+import utils
 import concurrent.futures
 from datetime import timedelta
 
@@ -38,7 +41,7 @@ class MarketMachine():
 
     def ValidUrl(url):
         if not url.startswith('http://') and not url.startswith('https://'):
-            url = 'http://' + url
+            url = 'https://' + url
 
         return url
 
@@ -117,8 +120,6 @@ class MarketMachine():
                                                     price,
                                                     MarketMachine.InspectLinkParser(_requests[i]["asset"]["market_actions"][0]["link"],                                                                              _requests[i]["listingid"], _requests[i]["asset"]["id"]))
 
-                    # time.sleep(1)
-
                     start += 100
                 else:
                     time.sleep(5)
@@ -130,7 +131,6 @@ class MarketMachine():
             print(f"Getting items from steam market - {round((start / master_count) * 100)}%               ", end="\r")
 
             r = requests.get(link + f"&start={start}&count={initial_count}")
-            print(link + f"&start={start}&count={initial_count}")
 
             if type(r.text) == str:
                 if len(r.text) > 1069:
@@ -174,8 +174,15 @@ class SkinMachine():
         global skinsParsed
 
         _sr = sr
-        key = os.environ.get('CSGO_FLOAT_API_KEY')
-        headers = {'Authorization': key}
+        key = 0
+        headers = {}
+
+        try:
+            key = os.environ.get('CSGO_FLOAT_API_KEY')
+            headers = {'Authorization': key}
+        except:
+            pass
+        
 
         r = SkinMachine.cached_req.get(
             "https://api.csgofloat.com/?url=" + _sr.inspect_link, headers=headers)
@@ -194,15 +201,31 @@ class SkinMachine():
 
         return skinsParsed
 
+output_file_name = ""
 
-x = MarketMachine.GetAllRequestsData(
-    item_link='https://steamcommunity.com/market/listings/730/AWP%20%7C%20Safari%20Mesh%20%28Battle-Scarred%29', currency='PLN')
+parser = argparse.ArgumentParser(description='CSGO Market Float Sniper')
+parser.add_argument('-l', help='Link to the item on the market', required=True)
+parser.add_argument('-c', help='Currency to use (-c list - to show all currencies)', required=True)
+parser.add_argument('-o', help='Output file', required=False)
+# parser.add_argument('-w', help='Watch mode', required=False)
+# parser.add_argument('-f', '--float', help='Get float of the item', required=False)
+args = parser.parse_args()
 
+output_file_name = str(args.o)
+
+if args.c == "list":
+    utils.displayAllCurrencies()
+    
+st = time.time()
+
+x = MarketMachine.GetAllRequestsData(args.l, args.c)
 x = SkinMachine.GetAllSkinsFloat(x)
 
-with open('data_final.csv', 'w') as f:
-    f.write("Price\tFloat\tSeed\tListingID\tAssetID\tJSLink\n")
-    for i in x:
-        f.write(str(i["item_price"]) + "\t" + str(i["float_value"]) + "\t" + str(i["pattern_id"]) + "\t" + str(
-            i["listing_id"]) + "\t" + str(i["asset_id"]) + "\t" + str(i["js_link"])+"\n")
-    f.close()
+utils.SaveDataToCSV(x, output_file_name)
+
+# x = MarketMachine.GetAllRequestsData(
+    # item_link='https://steamcommunity.com/market/listings/730/AWP%20%7C%20Electric%20Hive%20%28Field-Tested%29', currency='PLN')
+# 
+# x = SkinMachine.GetAllSkinsFloat(x)
+
+print("Done in " + str(round(time.time() - st, 1)) + f" seconds! Data saved in {output_file_name}.csv                            ")
