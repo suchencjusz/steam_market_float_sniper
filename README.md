@@ -13,6 +13,9 @@ The main purpose of the program is to collect data from the steam market and ser
  - [x] Gather data from steam
  - [x] Gather float and pattern data (with csgofloat api)
  - [ ] **Operate the program with cli**
+ - [ ] GUI
+ 
+ Future...
  - [ ] One-Click buy link
  - [ ] Monitor market for desired float/pattern
  - [ ] Notify of the desired float/pattern
